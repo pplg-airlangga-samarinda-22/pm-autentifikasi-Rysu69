@@ -21,7 +21,7 @@ if (isset($_SESSION['role'])) {
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
-    $password = $_POST['password']; // Password hashed using MD5 (matches your DB structure)
+    $password = md5($_POST['password']); // Password hashed using MD5 (matches your DB structure)
 
     // Connect to the database
     $hostname = "localhost";
