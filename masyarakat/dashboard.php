@@ -35,14 +35,26 @@
         $status = '0'; // Default status: pending
         $foto = null; // Default no photo uploaded
 
-        // Handle file upload if provided
-        if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
-            $target_dir = "../uploads/";
-            $target_file = $target_dir . basename($_FILES["foto"]["name"]);
-            if (move_uploaded_file($_FILES["foto"]["tmp_name"], $target_file)) {
-                $foto = $target_file;
-            }
-        }
+      // Handle file upload if provided
+if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+    $foto_name = $_FILES['foto']['name'];
+    $foto_tmp = $_FILES['foto']['tmp_name'];
+
+    // Set the target directory and file path
+    $target_dir = '../gambar/'; // Adjust for the 'gambar' folder being outside 'masyarakat'
+    $target_file = $target_dir . basename($foto_name);
+
+    // Move the uploaded file to the target directory
+    if (move_uploaded_file($foto_tmp, $target_file)) {
+        $foto = $target_file; // Save the file path to the database
+    } else {
+        $error = "Gagal mengunggah foto. Silakan coba lagi.";
+    }
+} else {
+    $foto = null; // No file uploaded
+}
+
+
 
         // Insert the laporan into the database
         $query_insert = $conn->prepare("INSERT INTO pengaduan (tgl_pengaduan, nik, isi_laporan, foto, status) VALUES (?, ?, ?, ?, ?)");
@@ -108,42 +120,52 @@
 
         <!-- Table of Previous Reports -->
         <div class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-xl font-bold mb-4">Laporan Anda</h2>
-            <table class="w-full table-auto border-collapse border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border border-gray-300 px-4 py-2">Tanggal</th>
-                        <th class="border border-gray-300 px-4 py-2">Isi Laporan</th>
-                        <th class="border border-gray-300 px-4 py-2">Status</th>
-                        <th class="border border-gray-300 px-4 py-2">Foto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($row = $result_laporan->fetch_assoc()): ?>
-                        <tr>
-                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['tgl_pengaduan']; ?></td>
-                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['isi_laporan']; ?></td>
-                            <td class="border border-gray-300 px-4 py-2">
-                                <?php 
-                                    if ($row['status'] === '0') {
-                                        echo "Belum Ditanggapi";
-                                    } else {
-                                        echo ucfirst($row['status']);
-                                    }
-                                ?>
-                            </td>
-                            <td class="border border-gray-300 px-4 py-2">
-                                <?php if ($row['foto']): ?>
-                                    <a href="<?php echo $row['foto']; ?>" target="_blank" class="text-blue-500 hover:underline">Lihat Foto</a>
-                                <?php else: ?>
-                                    Tidak Ada
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
+    <h2 class="text-xl font-bold mb-4">Laporan Anda</h2>
+    <table class="w-full table-auto border-collapse border border-gray-300">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="border border-gray-300 px-4 py-2">Tanggal</th>
+                <th class="border border-gray-300 px-4 py-2">Isi Laporan</th>
+                <th class="border border-gray-300 px-4 py-2">Status</th>
+                <th class="border border-gray-300 px-4 py-2">Foto</th>
+                <th class="border border-gray-300 px-4 py-2">Aksi</th> <!-- Added Aksi Column -->
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($row = $result_laporan->fetch_assoc()): ?>
+                <tr>
+                    <td class="border border-gray-300 px-4 py-2"><?php echo $row['tgl_pengaduan']; ?></td>
+                    <td class="border border-gray-300 px-4 py-2"><?php echo $row['isi_laporan']; ?></td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <?php 
+                            if ($row['status'] === '0') {
+                                echo "Belum Ditanggapi";
+                            } else {
+                                echo ucfirst($row['status']);
+                            }
+                        ?>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <?php if ($row['foto']): ?>
+                            <a href="<?php echo $row['foto']; ?>" target="_blank" class="text-blue-500 hover:underline">Lihat Foto</a>
+                        <?php else: ?>
+                            Tidak Ada
+                        <?php endif; ?>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <div class="rounded-md bg-yellow-300 text-center border-yellow-400 border-2">
+                        <a href="edit-aduan.php?id=<?php echo $row['id_pengaduan']; ?>" 
+                            class="text-grey-300 hover:underline text-center">
+                            Edit
+                        </a>
+                        </div>
+                    </td> <!-- Added Edit Link -->
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+</div>
+
     </div>
 
 </body>
