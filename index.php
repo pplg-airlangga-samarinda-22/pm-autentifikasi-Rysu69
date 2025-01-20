@@ -6,22 +6,15 @@ session_start();
 require_once 'config/database.php';
 
 // Check if the user is already logged in
-if (isset($_SESSION['role'])) {
-    // Redirect based on user role
-    if ($_SESSION['role'] == 'admin') {
-        header("Location: admin/dashboard.php");
-    } elseif ($_SESSION['role'] == 'petugas') {
-        header("Location: petugas/dashboard.php");
-    } elseif ($_SESSION['role'] == 'masyarakat') {
-        header("Location: masyarakat/dashboard.php");
-    }
+if (isset($_SESSION['role']) && $_SESSION['role'] == 'masyarakat') {
+    header("Location: masyarakat/dashboard.php");
     exit;
 }
 
-// Handle login form submission
+// Handle masyarakat login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
-    $password = md5($_POST['password']); // Password hashed using MD5 (matches your DB structure)
+    $password = md5($_POST['password']); // MD5 hash for password
 
     // Connect to the database
     $hostname = "localhost";
@@ -35,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Connection failed: " . $conn->connect_error);
     }
 
-    // Check if the user is a masyarakat
+    // Query masyarakat login
     $query_masyarakat = $conn->prepare("SELECT * FROM masyarakat WHERE username = ? AND password = ?");
     $query_masyarakat->bind_param("ss", $username, $password);
     $query_masyarakat->execute();
@@ -47,41 +40,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['role'] = 'masyarakat';
         header("Location: masyarakat/dashboard.php");
         exit;
+    } else {
+        $error = "Invalid username or password!";
     }
 
-    // Check if the user is a petugas or admin
-    $query_petugas = $conn->prepare("SELECT * FROM petugas WHERE username = ? AND password = ?");
-    $query_petugas->bind_param("ss", $username, $password);
-    $query_petugas->execute();
-    $result_petugas = $query_petugas->get_result();
-
-    if ($result_petugas->num_rows > 0) {
-        $user = $result_petugas->fetch_assoc();
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['level']; // Either 'admin' or 'petugas'
-        $redirect_page = $user['level'] == 'admin' ? "admin/dashboard.php" : "petugas/dashboard.php";
-        header("Location: $redirect_page");
-        exit;
-    }
-
-    // If no match, show error
-    $error = "Invalid username or password!";
     $conn->close();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login Masyarakat</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
     <div class="flex justify-center items-center h-screen">
         <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-            <h1 class="text-2xl font-bold text-center mb-6">Login</h1>
+            <h1 class="text-2xl font-bold text-center mb-6">Masyarakat Login</h1>
             
             <?php if (isset($error)): ?>
                 <p class="text-red-500 text-center mb-4"><?php echo $error; ?></p>
@@ -103,7 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     Login
                 </button>
             </form>
-
             <p class="text-center text-gray-600 mt-4">
                 Don't have an account? 
                 <a href="masyarakat/registration.php" class="text-blue-500 hover:underline">Register here</a>

@@ -1,3 +1,10 @@
+<?php 
+// session_start();
+// require '../config/database.php';
+// if (empty($_SESSION['level'])) {
+//     header("Location: login.php");
+// }
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,10 +14,13 @@
     <title>Pelaporan Pengaduan</title>
 </head>
 <body>
-    <h1>Selamat Datang di Aplikasi Pengaduan Masyarakat</h1>
+    <h1>Selamat Datang di Sistem Pengaduan Masyarakat</h1>
     <nav>
         <a href="index.php">Dashboard</a>
-        <a href="aduan.php">Aduan</a>
+        <a href="aduan.php">Pengaduan</a>
+        <a href="aduan.php">Masyarakat</a>
+        <a href="petugas-form.php">Petugas</a>
+        <a href="aduan.php">Laporan</a>
         <a href="logout.php">Logout</a>
     </nav>
 </body>
